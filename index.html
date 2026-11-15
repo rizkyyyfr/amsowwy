@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#2a1740">
+<title>Quest Maafkan Aku</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#2a1740;--bg2:#4a2468;--ink:#fff4fb;--pink:#ff5fa2;--gold:#ffd166;--mint:#7af0c0;--box:#1a0d2b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+body{background:radial-gradient(circle at 50% 0%,var(--bg2),var(--bg) 70%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.px{font-family:'Press Start 2P','Courier New',monospace;line-height:1.7}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.screen.on{display:flex}
+.stars{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(2px 2px at 20% 30%,#fff8,transparent),radial-gradient(2px 2px at 70% 20%,#fff8,transparent),radial-gradient(2px 2px at 40% 80%,#fff6,transparent),radial-gradient(2px 2px at 85% 65%,#fff8,transparent),radial-gradient(2px 2px at 10% 70%,#fff6,transparent)}
+h1{font-size:clamp(18px,6vw,28px);color:var(--gold);margin:0 0 18px;text-shadow:3px 3px 0 #0006}
+.sub{font-size:17px;margin:0 0 32px;max-width:300px}
+.btn{font-family:'Press Start 2P',monospace;font-size:12px;line-height:1.5;border:0;padding:16px 18px;color:#2a1740;background:var(--gold);box-shadow:0 5px 0 #b8892a,0 0 0 3px #2a1740 inset;border-radius:8px;cursor:pointer;max-width:90vw}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b8892a,0 0 0 3px #2a1740 inset}
+.btn.yes{background:var(--mint);box-shadow:0 5px 0 #3aa57c,0 0 0 3px #2a1740 inset;font-size:13px;padding:18px 16px}
+.btn.no{background:#ff8a8a;box-shadow:0 5px 0 #b34a4a,0 0 0 3px #2a1740 inset}
+.blink{animation:bl 1s steps(2) infinite}@keyframes bl{50%{opacity:.2}}
+.bounce{animation:bn 1.2s ease-in-out infinite}@keyframes bn{50%{transform:translateY(-10px)}}
+.hud{position:absolute;top:calc(env(safe-area-inset-top) + 14px);left:16px;right:16px;font-size:9px;display:flex;justify-content:space-between;gap:8px}
+.bar{height:14px;border:3px solid var(--ink);border-radius:4px;background:var(--box);overflow:hidden;width:100%;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--gold));transition:width .25s}
+/* dialog */
+#dlg{position:absolute;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom) + 18px);background:var(--box);border:4px solid var(--ink);border-radius:10px;padding:18px 16px 30px;min-height:190px;text-align:left}
+#who{position:absolute;top:-16px;left:14px;background:var(--pink);color:#2a1740;font-size:10px;padding:6px 10px;border:3px solid var(--ink);border-radius:6px}
+#txt{font-size:18px;font-weight:800;line-height:1.5;margin:8px 0 0}
+#nxt{position:absolute;right:14px;bottom:8px;font-size:12px;color:var(--gold)}
+#stage{position:absolute;top:0;left:0;right:0;bottom:240px;display:flex;align-items:center;justify-content:center;font-size:96px}
+/* game */
+#arena{position:absolute;top:110px;left:0;right:0;bottom:20px;overflow:hidden}
+.heart{position:absolute;font-size:44px;line-height:1;padding:10px;cursor:pointer;animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.boom{position:absolute;font-size:30px;pointer-events:none;animation:up .7s ease-out forwards}
+@keyframes up{to{transform:translateY(-70px) scale(1.6);opacity:0}}
+/* choice */
+#q{font-size:clamp(15px,4.6vw,20px);color:var(--gold);margin-bottom:12px}
+#hint{min-height:44px;font-size:15px;color:var(--pink);margin:22px 0 8px;font-weight:800}
+.row{display:flex;flex-direction:column;gap:22px;align-items:center}
+#no{touch-action:none}
+/* win */
+#win{background:radial-gradient(circle at 50% 40%,#6b2c91,#2a1740 75%);z-index:5}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+#win h1{font-size:clamp(22px,8vw,38px);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.big{font-size:84px;animation:bn 1s ease-in-out infinite}
+.thx{font-size:19px;font-weight:800;max-width:320px;line-height:1.5;margin:10px 0}
+.sign{color:var(--pink);margin-top:14px}
+@media (prefers-reduced-motion:reduce){.bounce,.big,#win h1,.blink{animation:none}}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<section class="screen on" id="start">
+  <div class="big bounce">💌</div>
+  <h1 class="px">QUEST<br>MAAFKAN AKU</h1>
+  <p class="sub">Sebuah game kecil yang dibuat khusus untuk Nazuah Anandita.</p>
+  <button class="btn" id="go">TEKAN START</button>
+</section>
+
+<section class="screen" id="story">
+  <div id="stage">🎮</div>
+  <div id="dlg"><div id="who" class="px">COWOKMU</div><p id="txt"></p><span id="nxt" class="px blink">▼</span></div>
+</section>
+
+<section class="screen" id="game">
+  <div class="hud px"><span>LEVEL 2</span><span id="cnt">0/8</span></div>
+  <div style="position:absolute;top:calc(env(safe-area-inset-top) + 40px);left:16px;right:16px"><div class="px" style="font-size:9px">METER MAAF</div><div class="bar"><i id="fill"></i></div></div>
+  <div id="arena"></div>
+</section>
+
+<section class="screen" id="choice">
+  <div class="big bounce" style="font-size:64px">🥺</div>
+  <h2 id="q" class="px">BOSS TERAKHIR:<br>KEPUTUSAN NAZUAH</h2>
+  <p class="sub" style="margin-bottom:14px">Sayang, setelah semua ini, apakah kamu mau memaafkan aku?</p>
+  <div class="row">
+    <button class="btn yes" id="yes">IYAAA AKU MAAFIN SAYANG</button>
+    <div id="hint"></div>
+    <button class="btn no" id="no">GAMAU MAAFIN</button>
+  </div>
+</section>
+
+<section class="screen" id="win">
+  <div class="big">🥰</div>
+  <h1 class="px">YEAAAAY!<br>MISSION COMPLETE</h1>
+  <p class="thx">Terima kasih banyak ya, Nazuah Anandita sayangku, sudah mau memaafkan aku.</p>
+  <p class="thx">Mulai malam ini aku janji: main game ada batasnya, dan telepon kamu sebelum tidur nggak akan aku lewatkan lagi.</p>
+  <p class="thx sign">Aku sayang kamu banyak-banyak. 💖</p>
+  <p class="px" style="font-size:10px;color:var(--gold);margin-top:16px">+9999 POIN CINTA</p>
+</section>
+<canvas id="fx"></canvas>
+
+<script>
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on')};
+
+/* ---------- Story ---------- */
+const scenes=[
+ ['🎮','COWOKMU','Halo, Nazuah Anandita sayang. Aku mau mengaku dulu...'],
+ ['🕹️','COWOKMU','Tadi malam aku main game kelamaan. Sampai lupa waktu. Sampai lupa kamu.'],
+ ['📵','COWOKMU','Padahal kita biasanya telponan dan ngobrol dulu sebelum tidur. Itu bagian favoritku, dan aku malah melewatkannya.'],
+ ['😔','COWOKMU','Aku sadar itu bikin kamu kecewa. Aku nyesel banget, dan aku minta maaf yang tulus.'],
+ ['💪','COWOKMU','Nah, supaya permintaan maafku sah, kamu harus lewati Level 2 dulu. Siap?']
+];
+let si=0,typing=false,timer;
+function say(){
+  const [em,who,t]=scenes[si];
+  $('stage').textContent=em;$('who').textContent=who;
+  const el=$('txt');el.textContent='';typing=true;let i=0;clearInterval(timer);
+  timer=setInterval(()=>{el.textContent=t.slice(0,++i);if(i>=t.length){clearInterval(timer);typing=false}},28);
+}
+$('go').onclick=()=>{show('story');si=0;say()};
+$('story').onclick=()=>{
+  if(typing){clearInterval(timer);$('txt').textContent=scenes[si][2];typing=false;return}
+  if(++si<scenes.length)say();else startGame();
+};
+
+/* ---------- Mini game ---------- */
+const GOAL=8;let got=0,spawner;
+const hearts=['💖','💗','💝','💓','💕'];
+function startGame(){
+  show('game');got=0;upd();$('arena').innerHTML='';
+  clearInterval(spawner);spawner=setInterval(spawn,650);spawn();
+}
+function upd(){$('cnt').textContent=got+'/'+GOAL;$('fill').style.width=(got/GOAL*100)+'%'}
+function spawn(){
+  const a=$('arena');if(a.children.length>3)return;
+  const h=document.createElement('div');h.className='heart';h.textContent=hearts[Math.random()*hearts.length|0];
+  h.style.left=Math.random()*(a.clientWidth-80)+'px';h.style.top=Math.random()*(a.clientHeight-80)+'px';
+  const hit=e=>{
+    e.preventDefault();if(h.dead)return;h.dead=1;
+    const b=document.createElement('div');b.className='boom';b.textContent='+1';b.style.left=h.style.left;b.style.top=h.style.top;a.appendChild(b);setTimeout(()=>b.remove(),700);
+    h.remove();got++;upd();
+    if(got>=GOAL){clearInterval(spawner);setTimeout(()=>show('choice'),450)}
+  };
+  h.addEventListener('pointerdown',hit);
+  a.appendChild(h);
+  setTimeout(()=>h.remove(),2200);
+}
+
+/* ---------- Tombol "gamau maafin" yang kabur ---------- */
+const no=$('no'),yes=$('yes');
+const taunts=['Eh, kok kabur? 😝','Tombolnya malu-malu...','Hayo, mau pencet apa? 👀','Tidak bisa, sayang 😘','Tombolnya takut sama kamu','Coba lagi? Nggak akan kena 😆','Yang bener cuma satu pilihan 💕','Tombolnya lagi olahraga 🏃'];
+let tIdx=0,moved=false;
+function dodge(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  const w=innerWidth,h=innerHeight,r=no.getBoundingClientRect(),y=yes.getBoundingClientRect();
+  const bw=moved?r.width:no.offsetWidth,bh=moved?r.height:no.offsetHeight;
+  let x,t,tries=0;
+  do{
+    x=8+Math.random()*(w-bw-16);
+    t=70+Math.random()*(h-bh-100);
+    tries++;
+  }while(tries<30&&(x<y.right+10&&x+bw>y.left-10&&t<y.bottom+10&&t+bh>y.top-10));
+  if(!moved){no.style.visibility='hidden';moved=true}
+  no.style.position='fixed';no.style.left=x+'px';no.style.top=t+'px';no.style.zIndex=4;no.style.visibility='visible';
+  $('hint').textContent=taunts[tIdx++%taunts.length];
+  if(navigator.vibrate)navigator.vibrate(30);
+}
+['pointerenter','pointerdown','touchstart','mouseover','mousedown','click','focus'].forEach(ev=>no.addEventListener(ev,dodge,{passive:false}));
+no.addEventListener('keydown',e=>{e.preventDefault();dodge(e)});
+
+/* ---------- Perayaan ---------- */
+yes.onclick=()=>{show('win');celebrate();if(navigator.vibrate)navigator.vibrate([80,40,80,40,200]);no.style.display='none'};
+const cv=$('fx'),cx=cv.getContext('2d');let parts=[],run=false;
+function size(){const d=devicePixelRatio||1;cv.width=innerWidth*d;cv.height=innerHeight*d;cx.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',size);size();
+const cols=['#ff5fa2','#ffd166','#7af0c0','#8ecbff','#ffffff','#c79bff'];
+function burst(x,y,n){
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=3+Math.random()*9;
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,g:.18,life:110+Math.random()*60,c:cols[Math.random()*cols.length|0],s:5+Math.random()*6,e:Math.random()<.3?'💖':null,r:Math.random()*6})}
+}
+function rain(){
+  for(let i=0;i<3;i++)parts.push({x:Math.random()*innerWidth,y:-20,vx:(Math.random()-.5)*2,vy:2+Math.random()*3,g:0,life:260,c:cols[Math.random()*cols.length|0],s:6+Math.random()*6,e:Math.random()<.5?['💖','💕','✨','🎉'][Math.random()*4|0]:null,r:Math.random()*6});
+}
+function celebrate(){
+  if(run)return;run=true;let f=0;
+  const W=innerWidth,H=innerHeight;
+  [[.2,.35],[.8,.35],[.5,.25],[.3,.6],[.7,.6]].forEach((p,i)=>setTimeout(()=>burst(W*p[0],H*p[1],70),i*250));
+  const rep=setInterval(()=>burst(Math.random()*W,Math.random()*H*.6,50),900);
+  (function loop(){
+    cx.clearRect(0,0,innerWidth,innerHeight);f++;
+    if(f%3===0)rain();
+    parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40);
+    for(const p of parts){
+      p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.life--;p.r+=.15;
+      cx.globalAlpha=Math.min(1,p.life/40);
+      if(p.e){cx.font=(p.s*3)+'px serif';cx.fillText(p.e,p.x,p.y)}
+      else{cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);cx.restore()}
+    }
+    cx.globalAlpha=1;requestAnimationFrame(loop);
+  })();
+}
+</script>
+</body>
+</html>
